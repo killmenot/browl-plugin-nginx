@@ -1,0 +1,30 @@
+{
+  "name": "browl-plugin-nginx",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Alexey Kucherenko",
+  "main": "index.js",
+  "license": "MIT",
+  "homepage": "https://github.com/killmenot/browl-plugin-nginx#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/killmenot/browl-plugin-nginx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/killmenot/browl-plugin-nginx/issues"
+  },
+  "scripts": {
+    "lint": "eslint lib index.js"
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "dependencies": {
+    "browl-util": "killmenot/browl-util",
+    "debug": "^4.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "pre-commit": "^1.2.2"
+  }
+}
