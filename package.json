@@ -1,7 +1,7 @@
 {
   "name": "browl-plugin-nginx",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Browl plugin that create/delete nginx config file for the instance",
   "author": "Alexey Kucherenko",
   "main": "index.js",
   "license": "MIT",
@@ -14,17 +14,35 @@
     "url": "https://github.com/killmenot/browl-plugin-nginx/issues"
   },
   "scripts": {
-    "lint": "eslint lib index.js"
+    "lint": "eslint lib test index.js",
+    "test": "NODE_ENV=test mocha",
+    "coverage": "nyc --reporter=html --reporter=text npm run test",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "pre-commit": [
-    "lint"
+    "lint",
+    "test"
   ],
+  "nyc": {
+    "all": true,
+    "include": [
+      "lib/*.js"
+    ]
+  },
   "dependencies": {
     "browl-util": "killmenot/browl-util",
     "debug": "^4.0.1"
   },
   "devDependencies": {
+    "browl-null": "github:killmenot/browl-null",
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.2",
     "eslint": "^4.9.0",
-    "pre-commit": "^1.2.2"
+    "fs-extra": "^7.0.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.0.1",
+    "pre-commit": "^1.2.2",
+    "sinon": "^6.3.4",
+    "sinon-chai": "^3.2.0"
   }
 }

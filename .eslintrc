@@ -34,5 +34,8 @@
       "last"
     ],
     "semi": [2, "always"]
+  },
+  "globals": {
+    "expect": false
   }
 }
