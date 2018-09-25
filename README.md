@@ -1,32 +1,46 @@
 # browl-plugin-nginx
 
-[![Build Status](https://travis-ci.org/killmenot/browl-plugin-nginx.svg?branch=master)](https://travis-ci.org/killmenot/browl-plugin-nginx) [![Coverage Status](https://coveralls.io/repos/github/killmenot/browl-plugin-yaml/badge.svg?branch=master)](https://coveralls.io/github/killmenot/browl-plugin-nginx?branch=master) [![Dependency Status](https://david-dm.org/killmenot/browl-plugin-nginx.svg)](hhttps://david-dm.org/killmenot/browl-plugin-nginx) [![npm version](https://img.shields.io/npm/v/browl-plugin-nginx.svg)](https://www.npmjs.com/package/browl-plugin-nginx)
+[![Build Status](https://travis-ci.org/killmenot/browl-plugin-nginx.svg?branch=master)](https://travis-ci.org/killmenot/browl-plugin-nginx) [![Coverage Status](https://coveralls.io/repos/github/killmenot/browl-nginx/badge.svg?branch=master)](https://coveralls.io/github/killmenot/browl-plugin-nginx?branch=master) [![Dependency Status](https://david-dm.org/killmenot/browl-plugin-nginx.svg)](https://david-dm.org/killmenot/browl-plugin-nginx) [![npm version](https://img.shields.io/npm/v/browl-plugin-nginx.svg)](https://www.npmjs.com/package/browl-plugin-nginx)
 
 Browl plugin that create/delete nginx config file for the instance
 
 
 ## Configuration
 
-### path
+### template
 Type: `string`
-The absolute or relative path (relative to deployed instance directory) to configuration
-*Default*: './config'
+The absolute or relative path (relative to repo config) to nginx template
+*Default*: './templates/nginx.tmpl'
+
+### destination
+Type: `string`
+The absolute path where nginx congifuration should be created. By default the file is created in `rootConfig.nginx.conf_dir` directory with pattern `${repo}_${branch}.conf`
+
+
+## getTemplateData
+
+To pass custom data to nginx template strategy should implement `getTemplateData` method that returns object that will be used to bind to the template.
+
 
 ## Example
 
 ```ini
 **rootConfig**
 [nginx]
+conf_dir = /etc/nginx/conf.d
 ```
 
 **repoConfig**
 ```ini
 [nginx]
+template = /path/to/template
 ```
 
 ## License
 
     The MIT License (MIT)
+
+    Copyright (c) Alexey Kucherenko
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
