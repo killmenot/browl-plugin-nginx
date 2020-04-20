@@ -2,6 +2,9 @@
   "name": "browl-plugin-nginx",
   "version": "0.1.0",
   "description": "Browl plugin that create/delete nginx config file for the instance",
+  "engines": {
+    "node": ">=10"
+  },
   "author": "Alexey Kucherenko",
   "main": "index.js",
   "license": "MIT",
