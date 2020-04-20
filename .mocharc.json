@@ -1,0 +1,8 @@
+{
+  "recursive": true,
+  "reporter": "spec",
+  "require": "test/helper.js",
+  "timeout": 2000,
+  "ui": "bdd",
+  "exit": true
+}

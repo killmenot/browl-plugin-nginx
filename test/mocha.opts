@@ -1,7 +1,0 @@
---ui bdd
---reporter spec
---colors
---require test/helper
---recursive
---timeout 2000
---exit
