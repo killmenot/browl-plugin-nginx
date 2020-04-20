@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs-extra');
+const fse = require('fs-extra');
 const path = require('path');
 const sinon = require('sinon');
 const NullStrategy = require('browl-null');
@@ -26,12 +26,13 @@ describe('browl-plugin-nginx', () => {
   }
 
   function mock() {
-    fs.ensureDirSync(tmpDir);
-    fs.ensureDirSync(rootConfig.conf_dir);
-    fs.ensureDirSync(rootConfig.nginx.conf_dir);
+    fse.ensureDirSync(tmpDir);
+    fse.ensureDirSync(rootConfig.conf_dir);
+    fse.ensureDirSync(rootConfig.nginx.conf_dir.path);
+    fse.ensureDirSync(rootConfig.nginx.include_dir.path);
 
     return {
-      restore: () => fs.removeSync(tmpDir)
+      restore: () => fse.removeSync(tmpDir)
     };
   }
 
@@ -42,7 +43,16 @@ describe('browl-plugin-nginx', () => {
     rootConfig = {
       conf_dir: resolve('/etc/browl'),
       nginx: {
-        conf_dir: resolve('/etc/nginx/conf.d')
+        targets: [
+          'conf_dir',
+          'include_dir'
+        ],
+        conf_dir: {
+          path: resolve('/etc/nginx/conf.d')
+        },
+        include_dir: {
+          path: resolve('/etc/nginx/include.d')
+        }
       }
     };
     repoConfig = {};
@@ -74,140 +84,160 @@ describe('browl-plugin-nginx', () => {
 
   describe('#create', () => {
     beforeEach(() => {
-      fs.ensureDirSync(path.join(rootConfig.conf_dir, repo, 'templates'));
-      fs.writeFileSync(path.join(rootConfig.conf_dir, repo, 'templates', 'nginx.tmpl'), 'content:<%= branch %>');
+      repoConfig.nginx = {
+        conf_dir: {
+          files: ['./templates/nginx.tmpl']
+        }
+      };
+
+      fse.ensureDirSync(path.join(rootConfig.conf_dir, repo, 'templates'));
+      fse.writeFileSync(path.join(rootConfig.conf_dir, repo, 'templates', 'nginx.tmpl'), 'content:<%= branch %>');
     });
 
-    it('should create nginx configuration for instance', (done) => {
+    it('should create nginx configuration for instance (relative path)', async () => {
       const expected = 'content:develop';
 
       nginxPlugin(strategy);
+      await strategy.create(branch, options);
 
-      strategy.create(branch, options).then(() => {
-        const actual = fs.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
+      const actual = fse.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
 
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
-        expect(actual).equal(expected);
-
-        done();
-      }).catch(done);
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      expect(actual).equal(expected);
     });
 
-    it('should create nginx configuration using config.template (absolute path)', (done) => {
+    it('should create nginx configuration for instance (absolute path)', async () => {
       const expected = 'foo:develop';
 
-      repoConfig.nginx = {
-        template: path.join(tmpDir, 'nginx.tmpl')
-      };
-      fs.writeFileSync(repoConfig.nginx.template, 'foo:<%= branch %>');
-
-      nginxPlugin(strategy);
-
-      strategy.create(branch, options).then(() => {
-        const actual = fs.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
-
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
-        expect(actual).equal(expected);
-
-        done();
-      }).catch(done);
-    });
-
-    it('should create nginx configuration using config.template (relative path)', (done) => {
-      const expected = 'bar:develop';
+      const file = path.join(tmpDir, 'nginx.tmpl');
+      fse.writeFileSync(file, 'foo:<%= branch %>');
 
       repoConfig.nginx = {
-        template: './quux.tmpl'
-      };
-      fs.writeFileSync(path.join(rootConfig.conf_dir, repo, 'quux.tmpl'), 'bar:<%= branch %>');
-
-      nginxPlugin(strategy);
-
-      strategy.create(branch, options).then(() => {
-        const actual = fs.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
-
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
-        expect(actual).equal(expected);
-
-        done();
-      }).catch(done);
-    });
-
-    it('should create nginx configuration in config.destination', (done) => {
-      const expected = 'content:develop';
-
-      repoConfig.nginx = {
-        destination: path.join(tmpDir, 'webapp_develop.conf')
+        conf_dir: {
+          files: [file]
+        }
       };
 
       nginxPlugin(strategy);
+      await strategy.create(branch, options);
 
-      strategy.create(branch, options).then(() => {
-        const actual = fs.readFileSync(repoConfig.nginx.destination).toString();
+      const actual = fse.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
 
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
-        expect(actual).equal(expected);
-
-        done();
-      }).catch(done);
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      expect(actual).equal(expected);
     });
 
-    it('should create nginx configuration for instance using getTemplateData', (done) => {
+    it('should create nginx configuration for instance (template data)', async () => {
       const expected = 'content:quux';
-
-      nginxPlugin(strategy);
 
       strategy.getTemplateData = () => ({ branch: 'quux' });
 
-      strategy.create(branch, options).then(() => {
-        const actual = fs.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
+      nginxPlugin(strategy);
+      await strategy.create(branch, options);
 
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
-        expect(actual).equal(expected);
+      const actual = fse.readFileSync(resolve('/etc/nginx/conf.d/webapp_develop.conf')).toString();
 
-        done();
-      }).catch(done);
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      expect(actual).equal(expected);
+    });
+
+    it('should create nginx configuration for instance (custom path)', async () => {
+      const expected = 'content:develop';
+
+      repoConfig.nginx = {
+        conf_dir: {
+          path: '/foo/bar.conf',
+          files: ['./templates/nginx.tmpl']
+        }
+      };
+
+      nginxPlugin(strategy);
+      await strategy.create(branch, options);
+
+      const actual = fse.readFileSync(resolve('/etc/nginx/conf.d/foo/bar.conf')).toString();
+
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      expect(actual).equal(expected);
+    });
+
+    it('should create nginx configuration for instance (custom path using template)', async () => {
+      const expected = 'content:develop';
+
+      repoConfig.nginx = {
+        conf_dir: {
+          path: '<%= repo %>/<%= branch %>/<%= name %>.conf',
+          files: ['./templates/nginx.tmpl']
+        }
+      };
+
+      nginxPlugin(strategy);
+      await strategy.create(branch, options);
+
+      const actual = fse.readFileSync(resolve('/etc/nginx/conf.d/webapp/develop/nginx.conf')).toString();
+
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      expect(actual).equal(expected);
+    });
+
+    it('should create nginx configuration for instance (error)', async () => {
+      repoConfig.nginx = {
+        conf_dir: {
+          files: ['./templates/nginx.tmpl']
+        }
+      };
+
+      strategy.getTemplateData = () => { throw new TypeError('foo'); };
+
+      try {
+        nginxPlugin(strategy);
+        await strategy.create(branch, options);
+      } catch (err) {
+        expect(err).be.instanceof(TypeError);
+      }
     });
   });
 
   describe('#delete', () => {
-    it('should delete instance nginx configuration ', (done) => {
+    beforeEach(() => {
+      repoConfig.nginx = {
+        conf_dir: {
+          files: ['./templates/nginx.tmpl']
+        }
+      };
+    });
+
+    it('should delete instance nginx configuration', async () => {
       const expected = false;
 
+      fse.writeFileSync(path.join(rootConfig.nginx.conf_dir.path, 'webapp_develop.conf'), 'content:develop');
+
       nginxPlugin(strategy);
-      fs.writeFileSync(path.join(rootConfig.nginx.conf_dir, 'webapp_develop.conf'), 'content:develop');
+      await strategy.delete(branch, options);
 
-      strategy.delete(branch, options).then(() => {
-        const actual = fs.existsSync(resolve('/etc/nginx/conf.d/webapp_develop.conf'));
+      const actual = fse.existsSync(resolve('/etc/nginx/conf.d/webapp_develop.conf'));
 
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
-        expect(actual).equal(expected);
-
-        done();
-      }).catch(done);
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      expect(actual).equal(expected);
     });
 
-    it('should return error when no nginx configuration file', (done) => {
-      nginxPlugin(strategy);
+    it('should return error when no nginx configuration file', async () => {
+      await nginxPlugin(strategy);
 
-      strategy.delete(branch, options).catch((err) => {
+      try {
+        await strategy.delete(branch, options);
+      } catch (err) {
         expect(err.code).equal('ENOENT');
         expect(browlUtil.sudo.notCalled).equal(true);
-
-        done();
-      });
+      }
     });
 
-    it('should not return error when no nginx configuration file (force)', (done) => {
-      nginxPlugin(strategy);
-
+    it('should not return error when no nginx configuration file (force)', async () => {
       options.force = true;
 
-      strategy.delete(branch, options).then(() => {
-        expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
+      nginxPlugin(strategy);
+      await strategy.delete(branch, options);
 
-        done();
-      }).catch(done);
+      expect(browlUtil.sudo.firstCall).calledWith('service', ['nginx', 'restart']);
     });
   });
 });
