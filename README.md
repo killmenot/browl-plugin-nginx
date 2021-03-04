@@ -12,7 +12,7 @@ Type: `string`
 The absolute or relative path (relative to repo config) to nginx template
 *Default*: './templates/nginx.tmpl'
 
-### destination
+### path
 Type: `string`
 The absolute path where nginx congifuration should be created. By default the file is created in `rootConfig.nginx.conf_dir` directory with pattern `${repo}_${branch}.conf`
 
@@ -33,7 +33,7 @@ conf_dir = /etc/nginx/conf.d
 **repoConfig**
 ```ini
 [nginx]
-template = /path/to/template
+path = /path/to/template
 ```
 
 ## License
