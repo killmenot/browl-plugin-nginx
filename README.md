@@ -1,6 +1,6 @@
 # browl-plugin-nginx
 
-[![Build Status](https://travis-ci.org/killmenot/browl-plugin-nginx.svg?branch=master)](https://travis-ci.org/killmenot/browl-plugin-nginx) [![Coverage Status](https://coveralls.io/repos/github/killmenot/browl-nginx/badge.svg?branch=master)](https://coveralls.io/github/killmenot/browl-plugin-nginx?branch=master) [![Dependency Status](https://david-dm.org/killmenot/browl-plugin-nginx.svg)](https://david-dm.org/killmenot/browl-plugin-nginx) [![npm version](https://img.shields.io/npm/v/browl-plugin-nginx.svg)](https://www.npmjs.com/package/browl-plugin-nginx)
+[![Build Status](https://travis-ci.org/killmenot/browl-plugin-nginx.svg?branch=master)](https://travis-ci.org/killmenot/browl-plugin-nginx) [![Coverage Status](https://coveralls.io/repos/github/killmenot/browl-plugin-nginx/badge.svg?branch=master)](https://coveralls.io/github/killmenot/browl-plugin-nginx?branch=master) [![Dependency Status](https://david-dm.org/killmenot/browl-plugin-nginx.svg)](https://david-dm.org/killmenot/browl-plugin-nginx) [![npm version](https://img.shields.io/npm/v/browl-plugin-nginx.svg)](https://www.npmjs.com/package/browl-plugin-nginx)
 
 Browl plugin that create/delete nginx config file for the instance
 
