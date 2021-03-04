@@ -42,7 +42,7 @@
     "browl-null": "^0.1.0",
     "chai": "^4.3.3",
     "coveralls": "^3.1.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.21.0",
     "mocha": "^8.3.0",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
